@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Workout">
+<meta name="theme-color" content="#000000">
+<title>12-Week Workout</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:#000;color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;overflow:hidden}
+#app{height:100%;display:flex;flex-direction:column}
+.screen{display:none;flex:1;flex-direction:column;overflow:hidden}
+.screen.active{display:flex}
+
+/* scrollable content */
+.scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px;padding-bottom:40px}
+
+/* sticky header */
+.sticky-hdr{background:#000;padding:12px 16px;border-bottom:0.5px solid #2C2C2E;flex-shrink:0}
+
+/* home */
+.app-title{font-size:26px;font-weight:700;margin-bottom:2px}
+.app-sub{color:#8E8E93;font-size:13px;margin-bottom:22px}
+.phase-block{margin-bottom:26px}
+.phase-hdr{border-left:3px solid;padding-left:12px;margin-bottom:12px}
+.phase-name{font-size:15px;font-weight:700}
+.phase-wks{color:#8E8E93;font-size:11px;margin-top:2px}
+.week-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.week-card{background:#1C1C1E;border-radius:14px;padding:14px;border:1px solid #2C2C2E;cursor:pointer;active:opacity:0.7}
+.week-card.done{border-color:#22C55E;background:#0D2B17}
+.week-top{display:flex;justify-content:space-between;margin-bottom:4px}
+.week-num{color:#fff;font-size:14px;font-weight:600}
+.week-check{color:#22C55E;font-size:14px;font-weight:700}
+.week-sub{color:#8E8E93;font-size:11px;margin-bottom:5px;line-height:14px}
+.week-days{color:#48484A;font-size:10px}
+
+/* week screen */
+.back-btn{color:#636366;font-size:14px;background:none;border:none;cursor:pointer;padding:0;margin-bottom:10px}
+.phase-pill{display:inline-block;border-radius:20px;padding:3px 12px;font-size:12px;font-weight:600;margin-bottom:10px}
+.wk-title{font-size:24px;font-weight:700;margin-bottom:2px}
+.wk-sub{color:#8E8E93;font-size:14px;margin-bottom:14px}
+.focus-box{background:#1C1C1E;border-radius:12px;padding:13px;margin-bottom:14px}
+.focus-lbl{color:#636366;font-size:10px;font-weight:600;letter-spacing:0.8px;margin-bottom:4px}
+.focus-txt{color:#E5E5EA;font-size:13px;line-height:19px}
+.goals-row{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:20px}
+.goal-card{background:#1C1C1E;border-radius:10px;padding:9px 6px;text-align:center}
+.goal-val{color:#fff;font-size:12px;font-weight:700;margin-bottom:2px}
+.goal-lbl{color:#636366;font-size:9px}
+.sec-hdr{color:#fff;font-size:16px;font-weight:700;margin-bottom:11px}
+.day-card{background:#1C1C1E;border-radius:14px;padding:15px;margin-bottom:9px;display:flex;align-items:center;border:1px solid #2C2C2E;cursor:pointer}
+.day-card.done{border-color:#22C55E;background:#0D2B17}
+.day-left{flex:1}
+.day-name{color:#fff;font-size:15px;font-weight:700;margin-bottom:2px}
+.day-label{color:#8E8E93;font-size:12px;margin-bottom:3px}
+.day-count{color:#48484A;font-size:10px}
+.day-badge{font-size:13px;font-weight:700}
+.done-badge{color:#22C55E}
+.start-badge{color:#0A84FF}
+.tip-box{background:#1C1C1E;border-radius:12px;padding:13px;margin-top:6px;margin-bottom:18px;border-left:3px solid #F59E0B}
+.tip-lbl{color:#F59E0B;font-size:10px;font-weight:700;letter-spacing:0.8px;margin-bottom:4px}
+.tip-txt{color:#E5E5EA;font-size:12px;line-height:18px}
+.wk-nav{display:flex;gap:10px;margin-top:4px}
+.wk-nav-btn{flex:1;background:#1C1C1E;border-radius:10px;padding:12px;text-align:center;color:#0A84FF;font-size:13px;font-weight:600;border:none;cursor:pointer}
+
+/* day screen */
+.day-hdr-row{display:flex;align-items:center}
+.day-hdr-back{color:#636366;font-size:20px;background:none;border:none;cursor:pointer;padding-right:12px}
+.day-hdr-center{flex:1}
+.day-hdr-title{color:#fff;font-size:14px;font-weight:700}
+.day-hdr-sub{color:#8E8E93;font-size:12px}
+.timer-btn{background:none;border:none;font-size:20px;cursor:pointer;padding-left:12px}
+.done-banner{margin:14px 16px 0;background:#0D2B17;border-radius:12px;padding:13px;border:1px solid #22C55E;text-align:center;color:#22C55E;font-size:14px;font-weight:700}
+.section{padding:18px 16px 0}
+.section-title{color:#636366;font-size:10px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:9px}
+.ex-row{background:#1C1C1E;border-radius:12px;padding:13px;display:flex;align-items:flex-start;margin-bottom:7px;border:1px solid #2C2C2E;cursor:pointer}
+.ex-row.checked{background:#0D2B17;border-color:#22C55E44}
+.checkbox{width:22px;height:22px;border-radius:11px;border:2px solid #3A3A3C;display:flex;align-items:center;justify-content:center;margin-right:11px;flex-shrink:0;margin-top:1px;font-size:11px;font-weight:800;color:#fff}
+.checkbox.checked{background:#22C55E;border-color:#22C55E}
+.ex-body{flex:1}
+.ex-name{color:#fff;font-size:14px;font-weight:600;margin-bottom:2px}
+.ex-name.checked{color:#48484A;text-decoration:line-through}
+.ex-detail{color:#8E8E93;font-size:11px;margin-bottom:1px}
+.ex-note{color:#636366;font-size:10px;font-style:italic}
+.sets-badge{background:#2C2C2E;border-radius:6px;padding:3px 7px;margin-left:8px;flex-shrink:0;align-self:flex-start}
+.sets-badge-txt{color:#8E8E93;font-size:10px;font-weight:600}
+
+/* rest timer */
+.timer-panel{background:#1C1C1E;margin:0 16px;border-radius:16px;padding:14px;margin-top:12px}
+.timer-panel-hdr{color:#8E8E93;font-size:11px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:10px}
+.timer-presets{display:flex;gap:7px;margin-bottom:11px}
+.timer-preset{flex:1;padding:6px;border-radius:8px;background:#2C2C2E;border:none;color:#8E8E93;font-size:12px;font-weight:500;cursor:pointer;text-align:center}
+.timer-preset.active{background:#3A3A3C;color:#fff}
+.timer-track{height:5px;background:#3A3A3C;border-radius:3px;margin-bottom:9px;overflow:hidden}
+.timer-fill{height:100%;border-radius:3px;transition:width 1s linear,background-color 1s}
+.timer-count{font-size:30px;font-weight:700;text-align:center;margin-bottom:11px;font-variant-numeric:tabular-nums}
+.timer-btns{display:flex;justify-content:center}
+.timer-start{background:#22C55E;border:none;border-radius:10px;padding:10px 36px;color:#fff;font-size:14px;font-weight:600;cursor:pointer}
+.timer-stop{background:#3A3A3C;border:none;border-radius:10px;padding:10px 36px;color:#FF453A;font-size:14px;font-weight:600;cursor:pointer}
+
+.spacer{height:40px}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- HOME SCREEN -->
+  <div id="screen-home" class="screen active">
+    <div class="scroll" id="home-scroll"></div>
+  </div>
+
+  <!-- WEEK SCREEN -->
+  <div id="screen-week" class="screen">
+    <div class="scroll" id="week-scroll"></div>
+  </div>
+
+  <!-- DAY SCREEN -->
+  <div id="screen-day" class="screen">
+    <div class="sticky-hdr">
+      <div class="day-hdr-row">
+        <button class="day-hdr-back" onclick="showWeek(state.currentWeek)">&#8592;</button>
+        <div class="day-hdr-center">
+          <div class="day-hdr-title" id="day-hdr-title"></div>
+          <div class="day-hdr-sub" id="day-hdr-sub"></div>
+        </div>
+        <button class="timer-btn" onclick="toggleTimer()" id="timer-toggle-btn">&#9201;</button>
+      </div>
+    </div>
+    <div class="scroll" id="day-scroll"></div>
+  </div>
+
+</div>
+
+<script>
+// ─── DATA ───────────────────────────────────────────────────────────────────
+const phases=[{id:1,name:'Foundation',weeks:'1–4',color:'#2563EB'},{id:2,name:'Build',weeks:'5–8',color:'#16A34A'},{id:3,name:'Push',weeks:'9–12',color:'#D97706'}];
+function getPhase(w){return w<=4?phases[0]:w<=8?phases[1]:phases[2];}
+const e=(name,sets,detail,note='')=>({name,sets,detail,note});
+const W={
+1:{title:'Week 1',subtitle:'Learn the movements',focus:'Form first. Light weight, full range of motion. Build the habit.',goals:[{label:'Sessions',value:'3'},{label:'Intensity',value:'50–60%'},{label:'Rest',value:'90s–2 min'},{label:'Priority',value:'Mobility + form'}],tip:"Record your starting weights in your notes app. Every time you add a rep or 5 lbs, note it. This is how you know you're progressing.",days:{Mon:{label:'Upper body A',sections:[{title:'Warm-up (10 min)',exercises:[e('Treadmill walk/light jog','10 min','Elevate to mild sweat'),e('Cat-cow + thoracic rotation','10 reps','Slow, controlled','Key for back health'),e('Band pull-aparts','2×15','Light band','Warms up rear delts and rotator cuff')]},{title:'Main lifts',exercises:[e('Dumbbell bench press','3×10','Light weight — focus on chest squeeze','Retract shoulder blades before each rep'),e('Seated cable row','3×10','Medium weight, pause at chest','Balances the press — crucial for back health'),e('Dumbbell overhead press','3×10','Seated is safer to start'),e('Lat pulldown','3×10','Wide grip, pull to chin')]},{title:'Cool-down (5 min)',exercises:[e('Chest doorway stretch','2×30s','Both arms'),e("Child's pose",'60s','')]}]},Wed:{label:'Lower body + core',sections:[{title:'Warm-up (10 min)',exercises:[e('Hip circles + leg swings','10 each','Loosen hips and hamstrings'),e('Bodyweight squat','2×15','Full depth, arms out front')]},{title:'Main lifts',exercises:[e('Goblet squat','3×12','Dumbbell at chest, heels shoulder-width','Great intro squat — keeps torso upright'),e('Romanian deadlift (RDL)','3×10','Dumbbells, hinge at hips, soft knees','Back-friendly hamstring builder'),e('Walking lunges','3×10/leg','Bodyweight or light DBs'),e('Glute bridge','3×15','Pause 1s at top','Activates glutes, reduces lower back strain')]},{title:'Core',exercises:[e('Dead bug','3×8/side','Lower back stays flat on floor','Safer than crunches for back health'),e('Plank','3×20s','Build to 30s next week')]}]},Fri:{label:'Upper body B + mobility',sections:[{title:'Warm-up (10 min)',exercises:[e('Shoulder CARs','5 each direction','Slow full circles'),e('Band pull-aparts','2×15','')]},{title:'Main lifts',exercises:[e('Incline dumbbell press','3×10','30–45° incline'),e('Dumbbell bent-over row','3×10/side','Single arm, brace on bench','Keep back neutral — no rounding'),e('Dumbbell bicep curl','3×12','Controlled — 2s up, 2s down'),e('Tricep pushdown (cable)','3×12','Rope attachment')]},{title:'Mobility (10 min)',exercises:[e("World's greatest stretch",'5/side','Lunge + thoracic rotation','Best all-around mobility drill'),e('Pigeon pose or figure-4 stretch','60s/side',''),e('Doorway pec stretch','2×30s','')]}]}}},
+2:{title:'Week 2',subtitle:'Reinforce patterns',focus:'Same structure, slightly more confident. Add 5 lbs where form felt solid.',goals:[{label:'Sessions',value:'3'},{label:'Intensity',value:'55–65%'},{label:'Rest',value:'90s'},{label:'Priority',value:'Consistency'}],tip:'Notice how your body feels during vs after workouts. Muscle soreness is normal. Joint pain during movement is a signal to stop and reassess.',days:{Mon:{label:'Upper body A',sections:[{title:'Warm-up',exercises:[e('Treadmill jog','8 min','Slightly faster than week 1'),e('Cat-cow + thoracic rotation','12 reps',''),e('Band pull-aparts','2×15','')]},{title:'Main lifts',exercises:[e('Dumbbell bench press','3×10','+5 lbs from week 1 if form was clean'),e('Seated cable row','3×10','+small increment'),e('Dumbbell overhead press','3×10','Try standing if back feels ok'),e('Lat pulldown','3×10','+increment'),e('Face pulls (cable)','3×15','Rope attachment, eye height','Rear delt + rotator cuff — back health priority')]},{title:'Cool-down',exercises:[e('Chest + shoulder stretch','60s each','')]}]},Wed:{label:'Lower body + core',sections:[{title:'Warm-up',exercises:[e('Hip mobility flow','8 min','Hip circles, leg swings, cossack squats')]},{title:'Main lifts',exercises:[e('Goblet squat','3×12','+5 lbs'),e('Romanian deadlift','3×10','+5 lbs'),e('Walking lunges','3×10/leg','Add light DBs if bodyweight felt easy'),e('Hip thrust','3×12','Replaces glute bridge — more range of motion')]},{title:'Core',exercises:[e('Dead bug','3×10/side','+2 reps'),e('Plank','3×30s','Up from 20s'),e('Side plank','2×20s/side','New')]}]},Fri:{label:'Upper body B + mobility',sections:[{title:'Warm-up',exercises:[e('Shoulder CARs + band pull-aparts','2×15','')]},{title:'Main lifts',exercises:[e('Incline dumbbell press','3×10','+5 lbs'),e('Dumbbell bent-over row','3×10/side','+5 lbs'),e('Dumbbell bicep curl','3×12',''),e('Tricep pushdown','3×12','')]},{title:'Mobility (10 min)',exercises:[e("World's greatest stretch",'5/side',''),e('Thoracic spine foam roll','60s','Slow rolls along t-spine','Excellent for posture + upper back health'),e('Couch stretch','60s/side','Hip flexor + quad stretch')]}]}}},
+3:{title:'Week 3',subtitle:'Add a day, add volume',focus:'Introduce a 4th training day. Volume goes up; intensity stays moderate.',goals:[{label:'Sessions',value:'4'},{label:'Intensity',value:'60–70%'},{label:'Rest',value:'75–90s'},{label:'Priority',value:'Volume + technique'}],tip:"Push/pull split is your new structure. This ensures every pressing muscle has a pulling counterpart — this prevents the back pain from returning.",days:{Mon:{label:'Push',sections:[{title:'Main lifts',exercises:[e('Dumbbell bench press','4×10','Up from 3 sets'),e('Incline dumbbell press','3×10',''),e('Dumbbell lateral raise','3×15','Light, controlled',"Side delt — key for 'wide shoulders' look"),e('Overhead press','3×10',''),e('Tricep pushdown','3×12',''),e('Overhead tricep extension','3×12','New')]}]},Tue:{label:'Pull',sections:[{title:'Main lifts',exercises:[e('Lat pulldown','4×10','Up from 3 sets'),e('Seated cable row','4×10',''),e('Face pulls','3×15',''),e('Dumbbell bent-over row','3×10/side',''),e('Bicep curl','3×12',''),e('Hammer curl','3×12','New — hits brachialis for arm thickness')]}]},Thu:{label:'Legs + core',sections:[{title:'Main lifts',exercises:[e('Goblet squat','4×12',''),e('Romanian deadlift','4×10',''),e('Walking lunges','3×12/leg',''),e('Hip thrust','3×12',''),e('Leg curl machine','3×12','New — isolates hamstrings')]},{title:'Core',exercises:[e('Dead bug','3×10/side',''),e('Plank','3×35s',''),e('Side plank','2×25s/side',''),e('Pallof press (cable)','3×10/side','New','Great for lower back protection')]}]},Sat:{label:'Full body + mobility',sections:[{title:'Lighter full-body',exercises:[e('Goblet squat','2×12','Lighter'),e('Dumbbell row','2×10/side',''),e('Dumbbell press','2×10',''),e('Stationary bike or brisk walk','15 min','Low intensity')]},{title:'Mobility (15 min)',exercises:[e('Full foam roll routine','5 min','Lats, T-spine, quads, IT band'),e('Hip flexor + pigeon stretch','60s/side',''),e('Doorway chest stretch','60s',''),e('Deep squat hold','60s','Hold something for balance')]}]}}},
+4:{title:'Week 4',subtitle:'Deload & assess',focus:'Planned recovery week. 60% effort. Let adaptations consolidate before Phase 2.',goals:[{label:'Sessions',value:'3'},{label:'Intensity',value:'50–60%'},{label:'Rest',value:'2 min'},{label:'Priority',value:'Recovery'}],tip:"Deload weeks are not optional — they're when your muscles actually grow. Use this week to also improve sleep and nutrition.",days:{Mon:{label:'Full body — light',sections:[{title:'Deload session',exercises:[e('Goblet squat','2×10','Light weight'),e('Dumbbell bench press','2×10','Light weight'),e('Lat pulldown','2×10',''),e('RDL','2×10',''),e('Face pulls','2×15','')]},{title:'Extended mobility (15 min)',exercises:[e('Full-body foam roll','8 min',''),e('Hip + hamstring stretches','60s each',''),e('Thoracic mobility drills','5 min','')]}]},Wed:{label:'Cardio + core',sections:[{title:'Active recovery',exercises:[e('Treadmill walk or light jog','25 min','Conversational pace'),e('Plank','3×30s',''),e('Dead bug','3×8/side',''),e('Glute bridge','3×15','')]}]},Fri:{label:'Full body — light B',sections:[{title:'Deload session',exercises:[e('Overhead press','2×10','Light'),e('Dumbbell row','2×10/side',''),e('Hip thrust','2×12',''),e('Bicep curl + tricep pushdown','2×12 each','')]},{title:'Reflect on Phase 1',exercises:[e('Review starting weights vs current','—','What went up? Where was form shaky?','This data shapes Phase 2 focus')]}]}}},
+5:{title:'Week 5',subtitle:'Phase 2: Build begins',focus:'Introduce barbell compounds. Heavier loads, 4-day push/pull/legs/full split.',goals:[{label:'Sessions',value:'4'},{label:'Intensity',value:'65–75%'},{label:'Rest',value:'2–3 min'},{label:'Priority',value:'Strength + hypertrophy'}],tip:'The barbell squat and bench press will feel awkward. Use a spotter or safety bars on the squat rack. Keep ego out of the weight selection for at least 2 weeks.',days:{Mon:{label:'Push',sections:[{title:'Warm-up',exercises:[e('Shoulder mobility + band work','10 min','')]},{title:'Main lifts',exercises:[e('Barbell bench press','4×8','New: start light, prioritize bar path','Wider base, more strength potential than DB'),e('Incline dumbbell press','3×10',''),e('Dumbbell lateral raise','4×15',''),e('Overhead press','3×8',''),e('Tricep pushdown + overhead extension','3×12 each','Superset')]}]},Tue:{label:'Pull',sections:[{title:'Main lifts',exercises:[e('Barbell row','4×8','New: builds serious back thickness','Hinge at hips, retract scapula on each rep'),e('Lat pulldown or assisted pull-up','4×8–10','','Working toward unassisted pull-ups'),e('Face pulls','3×15',''),e('Seated cable row','3×10',''),e('Curl superset (barbell + hammer)','3×10 each','')]}]},Thu:{label:'Legs',sections:[{title:'Main lifts',exercises:[e('Barbell back squat','4×8','New: the king of leg exercises','Start with just the bar + warm-up sets. Form first.'),e('Romanian deadlift','4×10','Add weight from Phase 1'),e('Walking lunges','3×12/leg','Dumbbells'),e('Hip thrust','3×12','Add barbell if ready'),e('Leg curl + leg extension','3×12 each','Superset')]},{title:'Core',exercises:[e('Plank','3×45s',''),e('Pallof press','3×12/side','')]}]},Sat:{label:'Full body + mobility',sections:[{title:'Full body',exercises:[e('Squat','2×8','Lighter'),e('Bench or OHP','2×8','Lighter'),e('Row','2×8','')]},{title:'Mobility (20 min)',exercises:[e('Foam roll full routine','8 min',''),e('Hip flexor + thoracic drills','5 min',''),e('Pigeon + couch stretch','60s/side each','')]}]}}},
+6:{title:'Week 6',subtitle:'Build momentum',focus:'Add weight to all main compound lifts. Begin tracking 1-rep max estimates.',goals:[{label:'Sessions',value:'4'},{label:'Intensity',value:'70–80%'},{label:'Rest',value:'2–3 min'},{label:'Priority',value:'Progressive overload'}],tip:'Introduce the conventional deadlift with a coach or experienced friend this week if possible. Form is everything on this lift.',days:{Mon:{label:'Push',sections:[{title:'Main lifts',exercises:[e('Barbell bench press','4×8','+5–10 lbs from week 5'),e('Incline DB press','3×10','+5 lbs'),e('Lateral raise','4×15',''),e('OHP','3×8','+5 lbs'),e('Tricep work','3×12','')]}]},Tue:{label:'Pull',sections:[{title:'Main lifts',exercises:[e('Barbell row','4×8','+5–10 lbs'),e('Lat pulldown / pull-up','4×8','Progress toward unassisted'),e('Face pulls','3×15',''),e('Cable row','3×10','+increment'),e('Curls','3×12','')]}]},Thu:{label:'Legs',sections:[{title:'Main lifts',exercises:[e('Barbell back squat','4×8','+10 lbs if form was solid'),e('Romanian deadlift','4×10','+5–10 lbs'),e('Lunges','3×12/leg',''),e('Hip thrust','3×12','+weight'),e('Leg curl + extension','3×12','')]}]},Sat:{label:'Active recovery',sections:[{title:'Cardio + mobility',exercises:[e('30 min moderate cardio','','Bike, row, elliptical — not treadmill every time'),e('Full mobility routine','20 min','')]}]}}},
+7:{title:'Week 7',subtitle:'Introduce the deadlift',focus:'Add the conventional deadlift. The single most impactful lift for your physique goals.',goals:[{label:'Sessions',value:'4'},{label:'Intensity',value:'72–82%'},{label:'Rest',value:'3 min'},{label:'Priority',value:'Deadlift form'}],tip:"The deadlift will make your entire back, glutes, and hamstrings sore in ways you haven't felt before. Add 10 lbs per session as long as form stays perfect.",days:{Mon:{label:'Push',sections:[{title:'Main lifts',exercises:[e('Bench press','4×8','+5 lbs if possible'),e('Incline press','3×10',''),e('Lateral raises','4×15',''),e('OHP','3×8',''),e('Tricep work','3×12','')]}]},Tue:{label:'Pull + deadlift',sections:[{title:'Main lifts',exercises:[e('Conventional deadlift','4×5','New: start light (bar + 45s). FORM FIRST.','Hinge, brace, push the floor away. Never round the lower back.'),e('Lat pulldown / pull-up','4×8',''),e('Barbell or cable row','3×10',''),e('Face pulls','3×15',''),e('Curls','3×12','')]}]},Thu:{label:'Legs',sections:[{title:'Main lifts',exercises:[e('Barbell back squat','4×8',''),e('Romanian deadlift','3×10','Reduce sets since full DL is now in pull day'),e('Lunges + leg curl','3×12',''),e('Hip thrust','3×12','')]}]},Sat:{label:'Full body + mobility',sections:[{title:'Active recovery',exercises:[e('Cardio','30 min','Low-moderate'),e('Mobility routine','20 min','Extra focus on hips + thoracic spine')]}]}}},
+8:{title:'Week 8',subtitle:'Phase 2 deload',focus:'Second planned deload. 60% effort. Reassess all lifts and set Phase 3 targets.',goals:[{label:'Sessions',value:'3'},{label:'Intensity',value:'55–65%'},{label:'Rest',value:'90s'},{label:'Priority',value:'Recovery + goal-setting'}],tip:'By now you should have a baseline on the big 3. Phase 3 goal: squat +20–30 lbs, bench +15–20 lbs, deadlift +30–40 lbs over 4 weeks.',days:{Mon:{label:'Full body — light',sections:[{title:'Deload',exercises:[e('Squat','2×8','60% of week 7 weight'),e('Bench','2×8',''),e('Row','2×8',''),e('Deadlift','2×5','Light — check form')]}]},Wed:{label:'Cardio + core',sections:[{title:'Active recovery',exercises:[e('30 min easy cardio','',''),e('Core routine','15 min','Planks, dead bug, Pallof')]}]},Fri:{label:'Upper + mobility',sections:[{title:'Light upper + stretch',exercises:[e('OHP + pull-ups','2×8 each',''),e('Full mobility session','25 min','Prioritize hips, thoracic, shoulders'),e('Set Phase 3 targets','—','Estimate goal squat/bench/deadlift for week 12')]}]}}},
+9:{title:'Week 9',subtitle:'Phase 3: Push begins',focus:'Higher intensity, lower reps on main lifts. Adding volume with accessories.',goals:[{label:'Sessions',value:'4–5'},{label:'Intensity',value:'75–85%'},{label:'Rest',value:'3 min'},{label:'Priority',value:'Strength + size'}],tip:"5×5 is a proven strength protocol. The heavier weight with lower reps builds denser muscle — that's the 'fit and buff' look you're after.",days:{Mon:{label:'Push — heavy',sections:[{title:'Main lifts',exercises:[e('Barbell bench press','5×5','Switch from 4×8 — heavier weight','This rep scheme builds the most strength'),e('Incline DB press','4×10',''),e('Lateral raise','4×15',''),e('OHP','4×8',''),e('Tricep dips (weighted)','3×10','Add weight with dip belt')]}]},Tue:{label:'Pull — heavy',sections:[{title:'Main lifts',exercises:[e('Deadlift','4×5','+10–20 lbs from week 7'),e('Weighted pull-ups','4×6–8','Use assistance if needed'),e('Barbell row','4×8',''),e('Face pulls','4×15',''),e('Curls','3×12','')]}]},Thu:{label:'Legs — heavy',sections:[{title:'Main lifts',exercises:[e('Barbell back squat','5×5','+weight from phase 2'),e('Romanian deadlift','4×10',''),e('Bulgarian split squat','3×10/leg','Replaces lunges — harder, more leg development'),e('Hip thrust','4×12','+weight'),e('Leg curl + extension superset','3×12','')]}]},Sat:{label:'Shoulders + arms + core',sections:[{title:'Dedicated arm/shoulder day',exercises:[e('OHP','3×8',''),e('Lateral raise + front raise','3×15 each',''),e('EZ bar curl + hammer curl','3×12 each',''),e('Tricep dips + pushdown superset','3×12 each',''),e('Core finisher','10 min','Plank, hollow hold, Pallof')]}]}}},
+10:{title:'Week 10',subtitle:'Volume peak',focus:'Maximum weekly volume. This is the hardest week of the program.',goals:[{label:'Sessions',value:'5'},{label:'Intensity',value:'78–88%'},{label:'Rest',value:'3 min'},{label:'Priority',value:'Max stimulus'}],tip:"You'll be sore in week 10. Sleep 8 hours. Eat enough protein (target: 140–160g/day at your weight). This is where the hard work of Phase 2 pays off.",days:{Mon:{label:'Push — max volume',sections:[{title:'Main lifts',exercises:[e('Bench press','5×5','+5 lbs from week 9'),e('Incline press','4×10','+5 lbs'),e('Cable fly','3×15','New: isolation for chest detail'),e('OHP','4×8','+5 lbs'),e('Lateral raises + rear delt fly','3×15 each',''),e('Tricep work','3×12','')]}]},Tue:{label:'Pull — max volume',sections:[{title:'Main lifts',exercises:[e('Deadlift','4×5','+10 lbs'),e('Pull-ups (weighted if possible)','4×6',''),e('Barbell row','4×8','+5 lbs'),e('Single-arm cable row','3×12/side','New'),e('Face pulls + shrugs','3×15 each',''),e('Curl superset','3×12','')]}]},Thu:{label:'Legs — max volume',sections:[{title:'Main lifts',exercises:[e('Squat','5×5','+5–10 lbs'),e('RDL','4×10','+5 lbs'),e('Bulgarian split squat','4×10/leg','+increment'),e('Hip thrust','4×12','+weight'),e('Leg press','3×15','New: high volume leg accessory')]}]},Fri:{label:'Shoulders + arms',sections:[{title:'Isolation work',exercises:[e('OHP','3×8',''),e('Lateral + rear delt raises','4×15 each',''),e('Bicep curls (multiple variations)','4×12',''),e('Tricep (multiple variations)','4×12','')]}]},Sat:{label:'Active recovery',sections:[{title:'Cardio + mobility',exercises:[e('30–40 min moderate cardio','',''),e('Full mobility routine','20 min','')]}]}}},
+11:{title:'Week 11',subtitle:'Intensity peak',focus:'Reduce volume slightly, increase intensity. Push for new personal bests.',goals:[{label:'Sessions',value:'4'},{label:'Intensity',value:'80–90%'},{label:'Rest',value:'3–4 min'},{label:'Priority',value:'Strength PRs'}],tip:'Attempt your personal records safely. Film yourself — watching back your heavy squat and deadlift form is one of the fastest ways to improve.',days:{Mon:{label:'Push — heavy',sections:[{title:'PR attempts',exercises:[e('Bench press','5×3','Heavier than any previous week','Use a spotter'),e('Incline press','3×8',''),e('OHP','3×6','New heavy PR attempt'),e('Isolation work','2×15 each','Lateral raises, cable fly, tricep')]}]},Tue:{label:'Pull — heavy',sections:[{title:'PR attempts',exercises:[e('Deadlift','4×3','Heaviest deadlift yet'),e('Pull-ups','4×6','Most weight added yet'),e('Row','3×8','Heavy'),e('Face pulls + curls','3×15','')]}]},Thu:{label:'Legs — heavy',sections:[{title:'PR attempts',exercises:[e('Squat','5×3','Heaviest squat yet'),e('RDL','3×8',''),e('Split squat','3×8/leg',''),e('Hip thrust','3×10','')]}]},Sat:{label:'Conditioning + mobility',sections:[{title:'Cardio focus',exercises:[e('HIIT or circuit','25 min','8 rounds: 30s hard / 90s rest'),e('Mobility routine','20 min','')]}]}}},
+12:{title:'Week 12',subtitle:'Peak & celebrate',focus:'Test week. Hit max lifts on the big 3. Then plan your next 12-week block.',goals:[{label:'Sessions',value:'3'},{label:'Intensity',value:'Max on test days'},{label:'Rest',value:'5 min (test day)'},{label:'Priority',value:'Results + next phase'}],tip:"Compare your week 1 and week 12 weights on every lift. If you added even 10 lbs to your bench and 20 to your deadlift — you're ahead of 90% of beginners. Now repeat.",days:{Mon:{label:'Bench + OHP test',sections:[{title:'1RM test — upper body',exercises:[e('Bench press — 1RM attempt','Work up to max','Warm up: bar → 50% → 70% → 85% → 95% → 100%','This is your 12-week bench PR. Write it down.'),e('OHP — 1RM attempt','Same protocol',''),e('Cool-down + stretch','10 min','')]}]},Wed:{label:'Squat + deadlift test',sections:[{title:'1RM test — lower body',exercises:[e('Squat — 1RM attempt','Work up to max','Full warm-up protocol. Spotter or safety bars required.'),e('Deadlift — 1RM attempt','Work up to max','Rest 10–15 min between squat and deadlift','This is your 12-week deadlift PR. Celebrate it.')]}]},Fri:{label:'Celebration + plan',sections:[{title:'Lighter full-body session',exercises:[e('Full-body light circuit','2 rounds',"All the movements you've learned — just enjoy it"),e('Full mobility session','25 min',"You've earned this one"),e('Plan your next 12 weeks','—','Start the next block 5–10% heavier.','The physique goal is a 1–2 year journey. You\'re already ahead.')]}]}}}
+};
+
+// ─── STATE ──────────────────────────────────────────────────────────────────
+const state={currentWeek:1,currentDay:null,timerOpen:false};
+let progress={};
+try{const s=localStorage.getItem('wk_progress');if(s)progress=JSON.parse(s);}catch(e){}
+function saveProgress(){try{localStorage.setItem('wk_progress',JSON.stringify(progress));}catch(e){}}
+
+// ─── PROGRESS HELPERS ────────────────────────────────────────────────────────
+function exKey(w,day,si,ei){return`w${w}_${day}_${si}_${ei}`;}
+function isDayDone(w,day){
+  const d=W[w].days[day];
+  return d.sections.every((s,si)=>s.exercises.every((_,ei)=>progress[exKey(w,day,si,ei)]));
+}
+function isWeekDone(w){return Object.keys(W[w].days).every(d=>isDayDone(w,d));}
+function totalEx(day){return day.sections.reduce((a,s)=>a+s.exercises.length,0);}
+
+// ─── SCREENS ────────────────────────────────────────────────────────────────
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+id).classList.add('active');
+}
+
+function showHome(){
+  showScreen('home');
+  const el=document.getElementById('home-scroll');
+  let h=`<p class="app-title">12-Week Plan</p><p class="app-sub">Tap a week to begin training</p>`;
+  phases.forEach((ph,pi)=>{
+    const wks=Array.from({length:4},(_,i)=>pi*4+i+1);
+    h+=`<div class="phase-block"><div class="phase-hdr" style="border-left-color:${ph.color}">
+      <div class="phase-name" style="color:${ph.color}">Phase ${ph.id}: ${ph.name}</div>
+      <div class="phase-wks">Weeks ${ph.weeks}</div></div><div class="week-grid">`;
+    wks.forEach(w=>{
+      const wd=W[w];const done=isWeekDone(w);
+      h+=`<div class="week-card${done?' done':''}" onclick="showWeek(${w})">
+        <div class="week-top"><span class="week-num">Week ${w}</span>${done?'<span class="week-check">✓</span>':''}</div>
+        <div class="week-sub">${wd.subtitle}</div>
+        <div class="week-days">${Object.keys(wd.days).join(' · ')}</div></div>`;
+    });
+    h+=`</div></div>`;
+  });
+  el.innerHTML=h;
+}
+
+function showWeek(w){
+  state.currentWeek=w;
+  showScreen('week');
+  const wd=W[w];const ph=getPhase(w);
+  let h=`<button class="back-btn" onclick="showHome()">← All weeks</button>
+    <div class="phase-pill" style="background:${ph.color}22;color:${ph.color}">Phase ${ph.id}: ${ph.name}</div>
+    <div class="wk-title">${wd.title}</div>
+    <div class="wk-sub">${wd.subtitle}</div>
+    <div class="focus-box"><div class="focus-lbl">FOCUS</div><div class="focus-txt">${wd.focus}</div></div>
+    <div class="goals-row">`;
+  wd.goals.forEach(g=>{h+=`<div class="goal-card"><div class="goal-val">${g.value}</div><div class="goal-lbl">${g.label}</div></div>`;});
+  h+=`</div><div class="sec-hdr">Training Days</div>`;
+  Object.entries(wd.days).forEach(([day,data])=>{
+    const done=isDayDone(w,day);
+    h+=`<div class="day-card${done?' done':''}" onclick="showDay(${w},'${day}')">
+      <div class="day-left">
+        <div class="day-name">${day}</div>
+        <div class="day-label">${data.label}</div>
+        <div class="day-count">${totalEx(data)} exercises</div>
+      </div>
+      <div class="day-badge ${done?'done-badge':'start-badge'}">${done?'✓ Done':'Start →'}</div></div>`;
+  });
+  h+=`<div class="tip-box"><div class="tip-lbl">💡 WEEK TIP</div><div class="tip-txt">${wd.tip}</div></div>
+    <div class="wk-nav">
+      ${w>1?`<button class="wk-nav-btn" onclick="showWeek(${w-1})">← Week ${w-1}</button>`:''}
+      ${w<12?`<button class="wk-nav-btn" onclick="showWeek(${w+1})">Week ${w+1} →</button>`:''}
+    </div><div class="spacer"></div>`;
+  document.getElementById('week-scroll').innerHTML=h;
+}
+
+// ─── TIMER ──────────────────────────────────────────────────────────────────
+let timerDuration=90,timerRemaining=null,timerInterval=null,timerRunning=false;
+function toggleTimer(){
+  state.timerOpen=!state.timerOpen;
+  document.getElementById('timer-toggle-btn').textContent=state.timerOpen?'✕':'⏱';
+  renderDayTimer();
+}
+function renderDayTimer(){
+  const existing=document.getElementById('timer-panel');
+  if(existing)existing.remove();
+  if(!state.timerOpen)return;
+  const presets=[60,90,120,180];
+  const fmtT=s=>`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+  const pct=timerRemaining!==null?timerRemaining/timerDuration:1;
+  const color=pct>0.5?'#22C55E':pct>0.25?'#F59E0B':'#EF4444';
+  const display=timerRemaining!==null?(timerRemaining<=0?'Done!':fmtT(timerRemaining)):fmtT(timerDuration);
+  let html=`<div id="timer-panel" class="timer-panel">
+    <div class="timer-panel-hdr">Rest Timer</div>
+    <div class="timer-presets">`;
+  presets.forEach(p=>{html+=`<button class="timer-preset${timerDuration===p&&!timerRunning?' active':''}" onclick="setTimerDuration(${p})">${p}s</button>`;});
+  html+=`</div><div class="timer-track"><div class="timer-fill" id="timer-fill" style="width:${Math.round(pct*100)}%;background:${color}"></div></div>
+    <div class="timer-count" id="timer-count">${display}</div>
+    <div class="timer-btns">
+      ${timerRunning
+        ?`<button class="timer-stop" onclick="stopTimer()">Cancel</button>`
+        :`<button class="timer-start" onclick="startTimer()">Start Rest</button>`}
+    </div></div>`;
+  const banner=document.getElementById('day-done-banner');
+  const scroll=document.getElementById('day-scroll');
+  if(banner){banner.insertAdjacentHTML('afterend',html);}
+  else{scroll.insertAdjacentHTML('afterbegin',html);}
+}
+function setTimerDuration(d){if(!timerRunning){timerDuration=d;timerRemaining=null;renderDayTimer();}}
+function startTimer(){
+  stopTimer();
+  timerRemaining=timerDuration;timerRunning=true;
+  const tick=()=>{
+    timerRemaining--;
+    const pct=timerRemaining/timerDuration;
+    const color=pct>0.5?'#22C55E':pct>0.25?'#F59E0B':'#EF4444';
+    const fill=document.getElementById('timer-fill');
+    const count=document.getElementById('timer-count');
+    if(fill)fill.style.cssText=`width:${Math.round(pct*100)}%;background:${color}`;
+    if(count)count.textContent=timerRemaining<=0?'Done!':`${Math.floor(timerRemaining/60)}:${String(timerRemaining%60).padStart(2,'0')}`;
+    if(timerRemaining<=0){
+      clearInterval(timerInterval);timerRunning=false;
+      if(navigator.vibrate)navigator.vibrate([400,200,400]);
+      setTimeout(()=>{timerRemaining=null;renderDayTimer();},2000);
+    }
+  };
+  timerInterval=setInterval(tick,1000);
+  renderDayTimer();
+}
+function stopTimer(){clearInterval(timerInterval);timerRunning=false;timerRemaining=null;}
+
+// ─── DAY SCREEN ──────────────────────────────────────────────────────────────
+function showDay(w,day){
+  state.currentWeek=w;state.currentDay=day;
+  stopTimer();state.timerOpen=false;
+  const wd=W[w];const data=wd.days[day];
+  document.getElementById('day-hdr-title').textContent=`${wd.title} · ${day}`;
+  document.getElementById('day-hdr-sub').textContent=data.label;
+  document.getElementById('timer-toggle-btn').textContent='⏱';
+  renderDayContent();
+  showScreen('day');
+}
+function renderDayContent(){
+  const w=state.currentWeek,day=state.currentDay;
+  const data=W[w].days[day];const done=isDayDone(w,day);
+  let h='';
+  if(done)h+=`<div class="done-banner" id="day-done-banner">✓ Day complete! Great work.</div>`;
+  data.sections.forEach((sec,si)=>{
+    h+=`<div class="section"><div class="section-title">${sec.title}</div>`;
+    sec.exercises.forEach((ex,ei)=>{
+      const key=exKey(w,day,si,ei);const chk=!!progress[key];
+      h+=`<div class="ex-row${chk?' checked':''}" onclick="toggleEx('${key}')">
+        <div class="checkbox${chk?' checked':''}">${chk?'✓':''}</div>
+        <div class="ex-body">
+          <div class="ex-name${chk?' checked':''}">${ex.name}</div>
+          ${ex.detail?`<div class="ex-detail">${ex.detail}</div>`:''}
+          ${ex.note?`<div class="ex-note">${ex.note}</div>`:''}
+        </div>
+        <div class="sets-badge"><span class="sets-badge-txt">${ex.sets}</span></div>
+      </div>`;
+    });
+    h+=`</div>`;
+  });
+  h+=`<div class="spacer"></div>`;
+  document.getElementById('day-scroll').innerHTML=h;
+  if(state.timerOpen)renderDayTimer();
+}
+function toggleEx(key){
+  progress[key]=!progress[key];
+  saveProgress();
+  renderDayContent();
+  if(state.timerOpen)renderDayTimer();
+}
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+showHome();
+</script>
+</body>
+</html>
